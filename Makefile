@@ -29,7 +29,7 @@ BIN := $(BUILD_DIR)/sharifos.bin
 ISO := $(BUILD_DIR)/sharifos.iso
 
 # === Main Targets ===
-.PHONY: all clean kernel i686 iso dirs
+.PHONY: all clean kernel i686 iso dirs build-env stop-env build run-env
 
 all: $(ISO)
 
@@ -61,3 +61,12 @@ dirs:
 clean:
 	rm -rf build
 	rm -f $(ISO)
+
+build-env:
+ docker build . -t sharif-build
+run-env:
+ docker run --rm -d --name sharif-build sharif-build
+build:
+ docker exec -it sharif-build bash -c make all
+stop-env:
+ docker kill sharif-build
