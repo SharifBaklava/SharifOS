@@ -9,7 +9,8 @@ mkdir -p isodir/boot/grub
 cp sysroot/boot/myos.kernel isodir/boot/myos.kernel
 cat > isodir/boot/grub/grub.cfg << EOF
 menuentry "myos" {
-	multiboot /boot/myos.kernel
+	multiboot2 /boot/myos.kernel
+	boot
 }
 EOF
 grub-mkrescue -o myos.iso isodir
