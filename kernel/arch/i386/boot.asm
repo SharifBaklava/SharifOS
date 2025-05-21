@@ -15,7 +15,7 @@ header_start:
 	dd 8
 header_end:
 
-global start
+global _start
 extern kernel_main
 
 
@@ -27,8 +27,12 @@ stack_top:
 
 section .text
 bits 32
-start:
+
+_start:
 	mov esp, stack_top
+	
+	; Call the global constructors.
+	call _init
 
 	; call check_long_mode
 	call kernel_main
