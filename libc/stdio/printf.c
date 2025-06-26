@@ -12,6 +12,14 @@ static bool print(const char* data, size_t length) {
 	return true;
 }
 
+int itoa(int value, char* buffer, int base) {
+	int i = 0;
+	do {
+		buffer[i++] = "0123456789abcdef"[value % base];
+	} while ((value /= base) != 0);
+	buffer[i] = '\0';
+	return i;
+}
 
 int printf(const char* restrict format, ...) {
 	va_list parameters;
@@ -62,6 +70,25 @@ int printf(const char* restrict format, ...) {
 			if (!print(str, len))
 				return -1;
 			written += len;
+		}
+		else if(*format == 'd') {
+			format++;
+			int digit = va_arg(parameters, int);
+			char buffer[12];
+			int digit_size = itoa(digit, buffer, 10);
+			 if (buffer == NULL) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+			size_t len = strlen(buffer);
+			if (maxrem < len) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+			if (!print(buffer, len))
+				return -1;
+			written += len;
+		
 		} else {
 			format = format_begun_at;
 			size_t len = strlen(format);

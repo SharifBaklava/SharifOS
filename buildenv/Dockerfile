@@ -31,5 +31,5 @@ RUN mkdir build-gcc && \
 	make install-target-libgcc && \
 	make install-target-libstdc++-v3
 
-RUN apt install -y nasm grub-pc-bin grub-common xorriso
+RUN apt update && apt install -y nasm grub-pc-bin grub-common xorriso
 CMD "/bin/bash"

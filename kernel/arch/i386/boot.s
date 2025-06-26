@@ -33,9 +33,10 @@ bits 32
 _start:
 	mov esp, stack_top
 	
+	push ebx
 	; Call the global constructors.
 	call _init
-
+	push eax
 	; call check_long_mode
 	call kernel_main
 	; call setup_page_tables

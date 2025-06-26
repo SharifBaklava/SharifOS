@@ -11,9 +11,13 @@ docker run -it --rm -v $(pwd):/mnt/share sharifos-env
 # in container!
 cd /mnt/share
 make clean
-make
+./build.sh # First one fails for some reason
+./build.sh
+./iso.sh
+
 ```
 ## run 
 ```bash
-qemu-system-i386 -cdrom myos.iso
+qemu-system-i386 -cdrom myos.iso -m 256M -s -S
+gdb ./kernel/myos.kernel
 ```
