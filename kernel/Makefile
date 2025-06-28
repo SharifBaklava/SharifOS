@@ -55,7 +55,6 @@ all: $(KBUILDDIR)/sharifos.kernel
 $(KBUILDDIR)/sharifos.kernel: $(OBJS) $(ARCHDIR)/linker.ld
 	mkdir -p $(KBUILDDIR)
 	$(CXX) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(LINK_LIST)
-	grub-file --is-x86-multiboot $@
 
 # Compile rules
 $(KBUILDDIR)/%.o: %.c

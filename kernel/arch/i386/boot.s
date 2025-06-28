@@ -24,7 +24,7 @@ extern _init
 section .bss
 align 16
 stack_bottom:
-times 16384 db 0;	 16 KiB
+    resb 16384;	 16 KiB
 stack_top:
 
 section .text
