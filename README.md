@@ -18,6 +18,6 @@ make clean
 ```
 ## run 
 ```bash
-qemu-system-i386 -cdrom myos.iso -m 256M -s -S
-gdb ./kernel/myos.kernel
+qemu-system-i386 -cdrom sharifos.iso -m 256M -s -S
+gdb ./kernel/sharifos.kernel
 ```

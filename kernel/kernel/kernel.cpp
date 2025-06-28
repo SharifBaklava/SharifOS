@@ -35,7 +35,7 @@ uint32_t get_ram_size(int32_t mbi_addr)
 		// Handle error: Memory map not found!
 		// You cannot proceed with memory management.
 		// print_error("Memory map not provided by bootloader!");
-		return;
+		return 0;
 	}
 
 	// Now, iterate through the memory map entries

@@ -1,83 +1,88 @@
-DEFAULT_HOST!=../default-host.sh
-HOST?=DEFAULT_HOST
-HOSTARCH!=../target-triplet-to-arch.sh $(HOST)
+DEFAULT_HOST != ../scripts/default-host.sh
+HOST ?= DEFAULT_HOST
+HOSTARCH != ../scripts/target-triplet-to-arch.sh $(HOST)
 
-CFLAGS?=-O2 -g
-CPPFLAGS?=
-LDFLAGS?=
-LIBS?=
+CFLAGS ?= -O2 -g
+CPPFLAGS ?=
+LDFLAGS ?=
+LIBS ?=
 
-DESTDIR?=
-PREFIX?=/usr/local
-EXEC_PREFIX?=$(PREFIX)
-INCLUDEDIR?=$(PREFIX)/include
-LIBDIR?=$(EXEC_PREFIX)/lib
+DESTDIR ?=
+PREFIX ?= /usr/local
+EXEC_PREFIX ?= $(PREFIX)
+INCLUDEDIR ?= $(PREFIX)/include
+LIBDIR ?= $(EXEC_PREFIX)/lib
 
-CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra
-CPPFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude
-LIBK_CFLAGS:=$(CFLAGS)
-LIBK_CPPFLAGS:=$(CPPFLAGS) -D__is_libk
+CFLAGS := $(CFLAGS) -ffreestanding -Wall -Wextra
+CPPFLAGS := $(CPPFLAGS) -D__is_libc -Iinclude
+LIBK_CFLAGS := $(CFLAGS)
+LIBK_CPPFLAGS := $(CPPFLAGS) -D__is_libk
 
-ARCHDIR=arch/$(HOSTARCH)
+ARCHDIR = arch/$(HOSTARCH)
+LIBCBUILDDIR := $(BUILDDIR)/libc
 
 include $(ARCHDIR)/make.config
 
-CFLAGS:=$(CFLAGS) $(ARCH_CFLAGS)
-CPPFLAGS:=$(CPPFLAGS) $(ARCH_CPPFLAGS)
-LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
-LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
+CFLAGS := $(CFLAGS) $(ARCH_CFLAGS)
+CPPFLAGS := $(CPPFLAGS) $(ARCH_CPPFLAGS)
+LIBK_CFLAGS := $(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
+LIBK_CPPFLAGS := $(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 
-FREEOBJS=\
-$(ARCH_FREEOBJS) \
-stdio/printf.o \
-stdio/putchar.o \
-stdio/puts.o \
-stdlib/abort.o \
-string/memcmp.o \
-string/memcpy.o \
-string/memmove.o \
-string/memset.o \
-string/strlen.o \
+# Source object names (relative to source tree)
+FREEOBJS_SRC := \
+	$(ARCH_FREEOBJS) \
+	stdio/printf.o \
+	stdio/putchar.o \
+	stdio/puts.o \
+	stdlib/abort.o \
+	string/memcmp.o \
+	string/memcpy.o \
+	string/memmove.o \
+	string/memset.o \
+	string/strlen.o
 
-HOSTEDOBJS=\
-$(ARCH_HOSTEDOBJS) \
+HOSTEDOBJS_SRC := \
+	$(ARCH_HOSTEDOBJS)
 
-OBJS=\
-$(FREEOBJS) \
-$(HOSTEDOBJS) \
+OBJS := $(addprefix $(LIBCBUILDDIR)/, $(FREEOBJS_SRC) $(HOSTEDOBJS_SRC))
+LIBK_OBJS := $(patsubst %.o, %.libk.o, $(addprefix $(LIBCBUILDDIR)/, $(FREEOBJS_SRC)))
 
-LIBK_OBJS=$(FREEOBJS:.o=.libk.o)
-
-#BINARIES=libc.a libk.a # Not ready for libc yet.
-BINARIES=libk.a
+BINARIES := $(addprefix $(LIBCBUILDDIR)/, libk.a)
 
 .PHONY: all clean install install-headers install-libs
 .SUFFIXES: .o .libk.o .c .S
 
 all: $(BINARIES)
 
-libc.a: $(OBJS)
+$(LIBCBUILDDIR)/libc.a: $(OBJS)
+	mkdir -p $(LIBCBUILDDIR)
 	$(AR) rcs $@ $(OBJS)
 
-libk.a: $(LIBK_OBJS)
+$(LIBCBUILDDIR)/libk.a: $(LIBK_OBJS)
+	mkdir -p $(LIBCBUILDDIR)
 	$(AR) rcs $@ $(LIBK_OBJS)
 
-.c.o:
+# Object rules
+$(LIBCBUILDDIR)/%.o: %.c
+	mkdir -p $(dir $@)
 	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
 
-.c.S:
+$(LIBCBUILDDIR)/%.o: %.S
+	mkdir -p $(dir $@)
 	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
-.c.libk.o:
+$(LIBCBUILDDIR)/%.libk.o: %.c
+	mkdir -p $(dir $@)
 	$(CC) -MD -c $< -o $@ -std=gnu11 $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
 
-.S.libk.o:
+$(LIBCBUILDDIR)/%.libk.o: %.S
+	mkdir -p $(dir $@)
 	$(CC) -MD -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
 
 clean:
 	rm -f $(BINARIES) *.a
-	rm -f $(OBJS) $(LIBK_OBJS) *.o */*.o */*/*.o
-	rm -f $(OBJS:.o=.d) $(LIBK_OBJS:.o=.d) *.d */*.d */*/*.d
+	rm -f $(OBJS) $(LIBK_OBJS)
+	rm -f $(OBJS:.o=.d) $(LIBK_OBJS:.o=.d)
 
 install: install-headers install-libs
 

@@ -13,7 +13,7 @@ __attribute__((__noreturn__)) void __stack_chk_fail(void)
 {
 #if __STDC_HOSTED__
 	abort();
-#elif __is_myos_kernel
+#elif __is_sharifos_kernel
 	panic("Stack smashing detected");
 #endif
 }
