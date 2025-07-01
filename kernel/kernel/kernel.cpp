@@ -68,5 +68,5 @@ extern "C" void kernel_main(uint32_t magic, uint32_t mbi_addr)
 	printf("one %d\n", magic);
 	uint32_t total_ram_mb = get_ram_size(mbi_addr);
 
-	printf("Total RAM: %d",total_ram_mb);
+	printf("Total RAM: %x\n",total_ram_mb);
 }

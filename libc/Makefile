@@ -50,7 +50,7 @@ LIBK_OBJS := $(patsubst %.o, %.libk.o, $(addprefix $(LIBCBUILDDIR)/, $(FREEOBJS_
 BINARIES := $(addprefix $(LIBCBUILDDIR)/, libk.a)
 
 .PHONY: all clean install install-headers install-libs
-.SUFFIXES: .o .libk.o .c .S
+.SUFFIXES: .o .libk.o .c .S .cpp
 
 all: $(BINARIES)
 
@@ -67,6 +67,10 @@ $(LIBCBUILDDIR)/%.o: %.c
 	mkdir -p $(dir $@)
 	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
 
+$(LIBCBUILDDIR)/%.o: %.cpp
+	mkdir -p $(dir $@)
+	$(CXX) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
+
 $(LIBCBUILDDIR)/%.o: %.S
 	mkdir -p $(dir $@)
 	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
@@ -74,6 +78,10 @@ $(LIBCBUILDDIR)/%.o: %.S
 $(LIBCBUILDDIR)/%.libk.o: %.c
 	mkdir -p $(dir $@)
 	$(CC) -MD -c $< -o $@ -std=gnu11 $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
+
+$(LIBCBUILDDIR)/%.libk.o: %.cpp
+	mkdir -p $(dir $@)
+	$(CXX) -MD -c $< -o $@ -std=gnu11 $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
 
 $(LIBCBUILDDIR)/%.libk.o: %.S
 	mkdir -p $(dir $@)

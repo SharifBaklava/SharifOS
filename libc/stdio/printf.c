@@ -18,7 +18,19 @@ int itoa(int value, char* buffer, int base) {
 		buffer[i++] = "0123456789abcdef"[value % base];
 	} while ((value /= base) != 0);
 	buffer[i] = '\0';
+	reverse(buffer, i);
 	return i;
+}
+void reverse(char* buffer, int length) {
+	int start = 0;
+	int end = length - 1;
+	while (start < end) {
+		char temp = buffer[start];
+		buffer[start] = buffer[end];
+		buffer[end] = temp;
+		start++;
+		end--;
+	}
 }
 
 int printf(const char* restrict format, ...) {
@@ -76,6 +88,25 @@ int printf(const char* restrict format, ...) {
 			int digit = va_arg(parameters, int);
 			char buffer[12];
 			int digit_size = itoa(digit, buffer, 10);
+			 if (buffer == NULL) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+			size_t len = strlen(buffer);
+			if (maxrem < len) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+			if (!print(buffer, len))
+				return -1;
+			written += len;
+		
+		}
+		else if(*format == 'x') {
+			format++;
+			int digit = va_arg(parameters, int);
+			char buffer[12];
+			int digit_size = itoa(digit, buffer, 16);
 			 if (buffer == NULL) {
 				// TODO: Set errno to EOVERFLOW.
 				return -1;
