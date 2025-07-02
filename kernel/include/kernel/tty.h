@@ -2,11 +2,30 @@
 #define _KERNEL_TTY_H
 
 #include <stddef.h>
-extern "C"
+#include <utils/Singleton.h>
+#include <stdint.h>
+#include <string.h>
+class Terminal
 {
-	void terminal_initialize(void);
-	void terminal_putchar(char c);
-	void terminal_write(const char *data, size_t size);
-	void terminal_writestring(const char *data);
-}
+	const size_t VGA_WIDTH = 80;
+	const size_t VGA_HEIGHT = 25;
+	uint16_t *const VGA_MEMORY = (uint16_t *)0xB8000;
+
+	size_t row;
+	size_t column;
+	uint8_t color;
+	uint16_t *buffer;
+
+public:
+	void initialize(void);
+	void putchar(char c);
+	void write(const char *data, size_t size);
+	void writestring(const char *data);
+	void setcolor(uint8_t color);
+	void putentryat(unsigned char c, uint8_t color, size_t x, size_t y);
+	void scroll(int lines = 1);
+
+		
+};
+
 #endif

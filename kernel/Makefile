@@ -29,14 +29,17 @@ LIBS := $(LIBS) $(KERNEL_ARCH_LIBS)
 KBUILDDIR = $(BUILDDIR)/kernel
 KERNEL_OBJS = \
 	$(addprefix $(KBUILDDIR)/, $(KERNEL_ARCH_OBJS)) \
-	$(KBUILDDIR)/kernel/kernel.o
+	$(KBUILDDIR)/kernel/kernel.o \
+	$(KBUILDDIR)/$(ARCHDIR)/get_ram_size.o
+
 
 OBJS = \
 	$(KBUILDDIR)/$(ARCHDIR)/crti.o \
 	$(KBUILDDIR)/$(ARCHDIR)/crtbegin.o \
 	$(KERNEL_OBJS) \
 	$(KBUILDDIR)/$(ARCHDIR)/crtend.o \
-	$(KBUILDDIR)/$(ARCHDIR)/crtn.o
+	$(KBUILDDIR)/$(ARCHDIR)/crtn.o \
+	$(KBUILDDIR)/$(ARCHDIR)/get_ram_size.o
 
 LINK_LIST = \
 	$(LDFLAGS) \
@@ -46,6 +49,7 @@ LINK_LIST = \
 	$(LIBS) \
 	$(KBUILDDIR)/$(ARCHDIR)/crtend.o \
 	$(KBUILDDIR)/$(ARCHDIR)/crtn.o
+
 
 .PHONY: all clean install install-headers install-kernel
 .SUFFIXES: .o .cpp .s .c
@@ -63,6 +67,7 @@ $(KBUILDDIR)/%.o: %.c
 
 $(KBUILDDIR)/%.o: %.cpp
 	mkdir -p $(dir $@)
+	echo "Compiling $<"
 	$(CXX) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
 $(KBUILDDIR)/%.o: %.s

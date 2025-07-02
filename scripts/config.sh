@@ -16,7 +16,7 @@ export BOOTDIR=/boot
 export LIBDIR=$EXEC_PREFIX/lib
 export INCLUDEDIR=$PREFIX/include
 export BUILDDIR=$(pwd)/build
-export DISTDIR=$(pwd)/dist1
+export DISTDIR=$(pwd)/dist
 
 export CFLAGS='-O0 -g'
 export CPPFLAGS='-g -O0'
