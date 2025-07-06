@@ -1,43 +1,57 @@
+#pragma once
 #include <consts.h>
-#include <utils/datastructures/LinkedList.h>
-class BuddyAllocator {
-	private:
-		LinkedList<size_t> free_lists[BUDDY_ORDERS]; // Array of linked lists for each order
-		size_t page_size; // Total size of the memory managed by the buddy allocator
-		void* internal_data;
-	public:
-		BuddyAllocator(size_t total_size)
-		{
+#include <stdint.h>
+#include <stdio.h>
+#define ALIGN_UP_4K(addr) (((addr) + 0xFFF) & ~0xFFF)
 
-		}
-		size_t calc_data()
-		{
+class MemoryManager; // Forward declaration
 
-		}
-		void* allocate(size_t size)
-		{
-			size_t aligned_size = align_to2power(size);
-			
-		}
-		void deallocate(void* ptr);
-		size_t get_total_size() const;
-		size_t get_free_size() const;
-		size_t align_to2power(size_t size)
-		{
-			if (size < BUDDY_ALLOCATOR_MIN_BLOCK_SIZE) {
-				return BUDDY_ALLOCATOR_MIN_BLOCK_SIZE;
-			}
-			size_t aligned_size = BUDDY_ALLOCATOR_MIN_BLOCK_SIZE;
-			while (aligned_size < size) {
-				aligned_size <<= 1; // Double the size until it is large enough
-			}
-			return aligned_size;
-		}
+#pragma pack(push, 1) // Ensure 1-byte alignment for the BuddyBlock structure
+struct BuddyBlock
+{
+	uint8_t flags;
+	uintptr_t next;
+	uintptr_t prev;
 };
+#pragma pack(pop) // Restore previous alignment
 
+class BuddyAllocator
+{
+public:
+	void init(MemoryManager *memoryManager);
+	// private:
+	// 	LinkedList<size_t> free_lists[BUDDY_ORDERS]; // Array of linked lists for each order
+	// 	size_t page_size; // Total size of the memory managed by the buddy allocator
+	// 	void* internal_data;
+	// public:
+	// 	BuddyAllocator(size_t total_size)
+	// 	{
 
+	// 	}
+	// 	size_t calc_data()
+	// 	{
 
+	// 	}
+	// 	void* allocate(size_t size)
+	// 	{
+	// 		size_t aligned_size = align_to2power(size);
 
+	// 	}
+	// 	void deallocate(void* ptr);
+	// 	size_t get_total_size() const;
+	// 	size_t get_free_size() const;
+	// 	size_t align_to2power(size_t size)
+	// 	{
+	// 		if (size < BUDDY_ALLOCATOR_MIN_BLOCK_SIZE) {
+	// 			return BUDDY_ALLOCATOR_MIN_BLOCK_SIZE;
+	// 		}
+	// 		size_t aligned_size = BUDDY_ALLOCATOR_MIN_BLOCK_SIZE;
+	// 		while (aligned_size < size) {
+	// 			aligned_size <<= 1; // Double the size until it is large enough
+	// 		}
+	// 		return aligned_size;
+	// 	}
+};
 
 // struct page {
 //     unsigned long flags;
@@ -45,7 +59,7 @@ class BuddyAllocator {
 //         struct page *next;
 //         struct page *prev;
 //     } lru;
-    
+
 //     /* ... other fields ... */
 // };
 
@@ -59,15 +73,13 @@ class BuddyAllocator {
 
 // --
 
-
-
 // RAM (0x0 → 0x08000000 = 128 MiB)
 // 0x00100000 (1 MiB) ┌───────────────────────────┐
 //                    │ Kernel ELF                │
 // 0x00200000 (2 MiB) ├───────────────────────────┤
 //                    │ struct free_area (~1 KB)  │ ← placed here by bootstrap allocator 11*orders head_0->page1
 //                    ├───────────────────────────┤
-//                    │ struct page array (2 MiB) │ ← placed here by bootstrap allocator 
+//                    │ struct page array (2 MiB) │ ← placed here by bootstrap allocator
 // 0x00400000 (4 MiB) ├───────────────────────────┤
 //                    │ Free RAM (Buddy-managed)  │
 //                    │ (124 MiB free)            │

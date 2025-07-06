@@ -30,7 +30,9 @@ KBUILDDIR = $(BUILDDIR)/kernel
 KERNEL_OBJS = \
 	$(addprefix $(KBUILDDIR)/, $(KERNEL_ARCH_OBJS)) \
 	$(KBUILDDIR)/kernel/kernel.o \
-	$(KBUILDDIR)/$(ARCHDIR)/get_ram_size.o
+	$(KBUILDDIR)/kernel/memory/memorymanager.o \
+	$(KBUILDDIR)/kernel/memory/BuddyAllocator.o
+
 
 
 OBJS = \
@@ -39,7 +41,6 @@ OBJS = \
 	$(KERNEL_OBJS) \
 	$(KBUILDDIR)/$(ARCHDIR)/crtend.o \
 	$(KBUILDDIR)/$(ARCHDIR)/crtn.o \
-	$(KBUILDDIR)/$(ARCHDIR)/get_ram_size.o
 
 LINK_LIST = \
 	$(LDFLAGS) \
