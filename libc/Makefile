@@ -1,52 +1,51 @@
+# Respect externally set variables
 DEFAULT_HOST != ../scripts/default-host.sh
 HOST ?= DEFAULT_HOST
 HOSTARCH != ../scripts/target-triplet-to-arch.sh $(HOST)
 
-CFLAGS ?= -O2 -g
+# Core flags (conditionally extended below)
+CFLAGS   ?= -O2 -g
 CPPFLAGS ?=
-LDFLAGS ?=
-LIBS ?=
+LDFLAGS  ?=
+LIBS     ?=
 
-DESTDIR ?=
-PREFIX ?= /usr/local
+# Install paths
+DESTDIR     ?=
+PREFIX      ?= /usr/local
 EXEC_PREFIX ?= $(PREFIX)
-INCLUDEDIR ?= $(PREFIX)/include
-LIBDIR ?= $(EXEC_PREFIX)/lib
+INCLUDEDIR  ?= $(PREFIX)/include
+LIBDIR      ?= $(EXEC_PREFIX)/lib
 
-CFLAGS := $(CFLAGS) -ffreestanding -Wall -Wextra
-CPPFLAGS := $(CPPFLAGS) -D__is_libc -Iinclude
-LIBK_CFLAGS := $(CFLAGS)
+# Compiler flags
+CFLAGS   += -ffreestanding -Wall -Wextra
+CPPFLAGS += -D__is_libc -Iinclude
+
+LIBK_CFLAGS   := $(CFLAGS)
 LIBK_CPPFLAGS := $(CPPFLAGS) -D__is_libk
 
-ARCHDIR = arch/$(HOSTARCH)
+# Architecture-specific settings
+ARCHDIR := arch/$(HOSTARCH)
 LIBCBUILDDIR := $(BUILDDIR)/libc
-
 include $(ARCHDIR)/make.config
 
-CFLAGS := $(CFLAGS) $(ARCH_CFLAGS)
-CPPFLAGS := $(CPPFLAGS) $(ARCH_CPPFLAGS)
-LIBK_CFLAGS := $(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
-LIBK_CPPFLAGS := $(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
+# Append architecture flags
+CFLAGS        += $(ARCH_CFLAGS)
+CPPFLAGS      += $(ARCH_CPPFLAGS)
+LIBK_CFLAGS   += $(KERNEL_ARCH_CFLAGS)
+LIBK_CPPFLAGS += $(KERNEL_ARCH_CPPFLAGS)
 
-# Source object names (relative to source tree)
-# List of folders
-SRC_DIRS := stdio stdlib string
+# Source discovery
+SRC_DIRS   := stdio stdlib string
+SRC_FILES  := $(foreach dir, $(SRC_DIRS), $(shell find $(dir) -type f \( -name '*.c' -o -name '*.cpp' \)))
 
-# Find all .c and .cpp files recursively in those folders
-SRC_FILES := $(foreach dir, $(SRC_DIRS), $(shell find $(dir) -type f \( -name '*.c' -o -name '*.cpp' \)))
+FREEOBJS_SRC := $(ARCH_FREEOBJS) $(patsubst %.c, %.o, $(patsubst %.cpp, %.o, $(SRC_FILES)))
+HOSTEDOBJS_SRC := $(ARCH_HOSTEDOBJS)
 
-
-
-FREEOBJS_SRC := \
-	$(ARCH_FREEOBJS) \
-	$(patsubst %.c, %.o, $(patsubst %.cpp, %.o, $(SRC_FILES)))
-
-HOSTEDOBJS_SRC := \
-	$(ARCH_HOSTEDOBJS)
-
-OBJS := $(addprefix $(LIBCBUILDDIR)/, $(FREEOBJS_SRC) $(HOSTEDOBJS_SRC))
+# Full object paths
+OBJS      := $(addprefix $(LIBCBUILDDIR)/, $(FREEOBJS_SRC) $(HOSTEDOBJS_SRC))
 LIBK_OBJS := $(patsubst %.o, %.libk.o, $(addprefix $(LIBCBUILDDIR)/, $(FREEOBJS_SRC)))
 
+# Final binaries
 BINARIES := $(addprefix $(LIBCBUILDDIR)/, libk.a)
 
 .PHONY: all clean install install-headers install-libs
@@ -54,22 +53,23 @@ BINARIES := $(addprefix $(LIBCBUILDDIR)/, libk.a)
 
 all: $(BINARIES)
 
+# Static libraries
 $(LIBCBUILDDIR)/libc.a: $(OBJS)
 	mkdir -p $(LIBCBUILDDIR)
-	$(AR) rcs $@ $(OBJS)
+	$(AR) rcs $@ $^
 
 $(LIBCBUILDDIR)/libk.a: $(LIBK_OBJS)
 	mkdir -p $(LIBCBUILDDIR)
-	$(AR) rcs $@ $(LIBK_OBJS)
+	$(AR) rcs $@ $^
 
-# Object rules
+# Build rules
 $(LIBCBUILDDIR)/%.o: %.c
 	mkdir -p $(dir $@)
-	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
+	$(CC) -MD -std=gnu11 -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
 $(LIBCBUILDDIR)/%.o: %.cpp
 	mkdir -p $(dir $@)
-	$(CXX) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
+	$(CXX) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
 $(LIBCBUILDDIR)/%.o: %.S
 	mkdir -p $(dir $@)
@@ -77,21 +77,23 @@ $(LIBCBUILDDIR)/%.o: %.S
 
 $(LIBCBUILDDIR)/%.libk.o: %.c
 	mkdir -p $(dir $@)
-	$(CC) -MD -c $< -o $@ -std=gnu11 $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
+	$(CC) -MD -std=gnu11 -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
 
 $(LIBCBUILDDIR)/%.libk.o: %.cpp
 	mkdir -p $(dir $@)
-	$(CXX) -MD -c $< -o $@ -std=gnu11 $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
+	$(CXX) -MD -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
 
 $(LIBCBUILDDIR)/%.libk.o: %.S
 	mkdir -p $(dir $@)
 	$(CC) -MD -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
 
+# Clean
 clean:
 	rm -f $(BINARIES) *.a
 	rm -f $(OBJS) $(LIBK_OBJS)
 	rm -f $(OBJS:.o=.d) $(LIBK_OBJS:.o=.d)
 
+# Install targets
 install: install-headers install-libs
 
 install-headers:
@@ -102,5 +104,6 @@ install-libs: $(BINARIES)
 	mkdir -p $(DESTDIR)$(LIBDIR)
 	cp $(BINARIES) $(DESTDIR)$(LIBDIR)
 
+# Include dependency files
 -include $(OBJS:.o=.d)
 -include $(LIBK_OBJS:.o=.d)

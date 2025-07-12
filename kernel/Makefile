@@ -1,53 +1,62 @@
+# Detect host and architecture
 DEFAULT_HOST != ../scripts/default-host.sh
-HOST ?= DEFAULT_HOST
-HOSTARCH != ../scripts/target-triplet-to-arch.sh $(HOST)
+HOST         ?= DEFAULT_HOST
+HOSTARCH     != ../scripts/target-triplet-to-arch.sh $(HOST)
 
-CFLAGS ?= -O2 -g -fstack-protector
+# Basic flags
+CFLAGS   ?= -O2 -g -fstack-protector
 CPPFLAGS ?=
-LDFLAGS ?=
-LIBS ?=
+LDFLAGS  ?=
+LIBS     ?=
 
-DESTDIR ?=
-PREFIX ?= /usr/local
+# Install paths
+DESTDIR     ?=
+PREFIX      ?= /usr/local
 EXEC_PREFIX ?= $(PREFIX)
-BOOTDIR ?= $(EXEC_PREFIX)/boot
-INCLUDEDIR ?= $(PREFIX)/include
+BOOTDIR     ?= $(EXEC_PREFIX)/boot
+INCLUDEDIR  ?= $(PREFIX)/include
 
-CFLAGS := $(CFLAGS) -ffreestanding -Wall -Wextra
-CPPFLAGS := $(CPPFLAGS) -D__is_kernel -Iinclude
-LIBS := $(LIBS) -nostdlib -lk -lgcc
+# Core compiler flags
+CFLAGS   += -ffreestanding -Wall -Wextra
+CPPFLAGS += -D__is_kernel -Iinclude
+LIBS     += -nostdlib -lk -lgcc
 
-ARCHDIR = arch/$(HOSTARCH)
-
+# Architecture-specific config
+ARCHDIR := arch/$(HOSTARCH)
 include $(ARCHDIR)/make.config
 
-CFLAGS := $(CFLAGS) $(KERNEL_ARCH_CFLAGS)
-CPPFLAGS := $(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
-LDFLAGS := $(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
-LIBS := $(LIBS) $(KERNEL_ARCH_LIBS)
+CFLAGS   += $(KERNEL_ARCH_CFLAGS)
+CPPFLAGS += $(KERNEL_ARCH_CPPFLAGS)
+LDFLAGS  += $(KERNEL_ARCH_LDFLAGS)
+LIBS     += $(KERNEL_ARCH_LIBS)
 
-KBUILDDIR = $(BUILDDIR)/kernel
-KERNEL_SOURCES := $(shell find ./kernel -type f \( -name '*.cpp' -o -name '*.c' \))
-KERNEL_ARCH_SOURCES = $(shell find ./$(ARCHDIR) -type f \( -name '*.cpp' -o -name '*.c' -o -name '*.s' \))
+# Build directories
+KBUILDDIR := $(BUILDDIR)/kernel
 
-KERNEL_OBJS = \
-	$(patsubst ./%, $(KBUILDDIR)/%.o, $(basename $(KERNEL_ARCH_SOURCES)))\
+# Source discovery
+KERNEL_SOURCES      := $(shell find ./kernel -type f \( -name '*.cpp' -o -name '*.c' \))
+KERNEL_ARCH_SOURCES := $(shell find ./$(ARCHDIR) -type f \( -name '*.cpp' -o -name '*.c' -o -name '*.s' \))
+
+KERNEL_OBJS := \
+	$(addprefix $(KBUILDDIR)/, $(KERNEL_ARCH_OBJS)) \
 	$(patsubst ./%, $(KBUILDDIR)/%.o, $(basename $(KERNEL_SOURCES)))
 
-OBJS = \
+OBJS := \
+	$(KBUILDDIR)/$(ARCHDIR)/crti.o \
 	$(KBUILDDIR)/$(ARCHDIR)/crtbegin.o \
 	$(KERNEL_OBJS) \
 	$(KBUILDDIR)/$(ARCHDIR)/crtend.o \
+	$(KBUILDDIR)/$(ARCHDIR)/crtn.o
 
-LINK_LIST = \
+LINK_LIST := \
 	$(LDFLAGS) \
+	$(KBUILDDIR)/$(ARCHDIR)/crti.o \
 	$(KBUILDDIR)/$(ARCHDIR)/crtbegin.o \
 	$(KERNEL_OBJS) \
 	$(LIBS) \
 	$(KBUILDDIR)/$(ARCHDIR)/crtend.o \
+	$(KBUILDDIR)/$(ARCHDIR)/crtn.o
 
-
-$(info LINK_LIST=$(LINK_LIST))
 .PHONY: all clean install install-headers install-kernel
 .SUFFIXES: .o .cpp .s .c
 
@@ -57,10 +66,10 @@ $(KBUILDDIR)/sharifos.kernel: $(OBJS) $(ARCHDIR)/linker.ld
 	mkdir -p $(KBUILDDIR)
 	$(CXX) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(LINK_LIST)
 
-# Compile rules
+# Compilation rules
 $(KBUILDDIR)/%.o: %.c
 	mkdir -p $(dir $@)
-	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
+	$(CC) -MD -std=gnu11 -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
 $(KBUILDDIR)/%.o: %.cpp
 	mkdir -p $(dir $@)
@@ -71,16 +80,18 @@ $(KBUILDDIR)/%.o: %.s
 	mkdir -p $(dir $@)
 	nasm -f elf32 $< -o $@
 
-# crtbegin/crtend copy from compiler runtime
+# GCC runtime objects
 $(KBUILDDIR)/$(ARCHDIR)/crtbegin.o $(KBUILDDIR)/$(ARCHDIR)/crtend.o:
 	mkdir -p $(dir $@)
-	OBJ=`$(CXX) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
+	OBJ=`$(CXX) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp $$OBJ $@
 
+# Clean build
 clean:
 	rm -f $(KBUILDDIR)/sharifos.kernel
 	rm -f $(OBJS)
 	rm -f $(OBJS:.o=.d)
 
+# Installation
 install: install-headers install-kernel
 
 install-headers:
@@ -89,7 +100,7 @@ install-headers:
 
 install-kernel: $(KBUILDDIR)/sharifos.kernel
 	mkdir -p $(DESTDIR)$(BOOTDIR)
-	cp $(KBUILDDIR)/sharifos.kernel $(DESTDIR)$(BOOTDIR)
+	cp $< $(DESTDIR)$(BOOTDIR)
 
-# Include dependency files
+# Include auto-generated dependencies
 -include $(OBJS:.o=.d)
