@@ -1,6 +1,8 @@
 #pragma once
 #include <kernel/tty.h>
 #include <kernel/memory/memorymanager.h>
+
+#define krn Kernel::i
 class Kernel
 {
 public:

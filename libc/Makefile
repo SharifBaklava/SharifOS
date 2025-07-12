@@ -29,17 +29,17 @@ LIBK_CFLAGS := $(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
 LIBK_CPPFLAGS := $(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 
 # Source object names (relative to source tree)
+# List of folders
+SRC_DIRS := stdio stdlib string
+
+# Find all .c and .cpp files recursively in those folders
+SRC_FILES := $(foreach dir, $(SRC_DIRS), $(shell find $(dir) -type f \( -name '*.c' -o -name '*.cpp' \)))
+
+
+
 FREEOBJS_SRC := \
 	$(ARCH_FREEOBJS) \
-	stdio/printf.o \
-	stdio/putchar.o \
-	stdio/puts.o \
-	stdlib/abort.o \
-	string/memcmp.o \
-	string/memcpy.o \
-	string/memmove.o \
-	string/memset.o \
-	string/strlen.o
+	$(patsubst %.c, %.o, $(patsubst %.cpp, %.o, $(SRC_FILES)))
 
 HOSTEDOBJS_SRC := \
 	$(ARCH_HOSTEDOBJS)

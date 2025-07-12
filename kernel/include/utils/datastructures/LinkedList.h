@@ -1,5 +1,3 @@
-
-
 // template <typename T>
 // class LinkedListNode 
 // {

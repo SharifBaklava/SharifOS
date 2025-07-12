@@ -27,31 +27,27 @@ LDFLAGS := $(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
 LIBS := $(LIBS) $(KERNEL_ARCH_LIBS)
 
 KBUILDDIR = $(BUILDDIR)/kernel
+KERNEL_SOURCES := $(shell find ./kernel -type f \( -name '*.cpp' -o -name '*.c' \))
+KERNEL_ARCH_SOURCES = $(shell find ./$(ARCHDIR) -type f \( -name '*.cpp' -o -name '*.c' -o -name '*.s' \))
+
 KERNEL_OBJS = \
-	$(addprefix $(KBUILDDIR)/, $(KERNEL_ARCH_OBJS)) \
-	$(KBUILDDIR)/kernel/kernel.o \
-	$(KBUILDDIR)/kernel/memory/memorymanager.o \
-	$(KBUILDDIR)/kernel/memory/BuddyAllocator.o
-
-
+	$(patsubst ./%, $(KBUILDDIR)/%.o, $(basename $(KERNEL_ARCH_SOURCES)))\
+	$(patsubst ./%, $(KBUILDDIR)/%.o, $(basename $(KERNEL_SOURCES)))
 
 OBJS = \
-	$(KBUILDDIR)/$(ARCHDIR)/crti.o \
 	$(KBUILDDIR)/$(ARCHDIR)/crtbegin.o \
 	$(KERNEL_OBJS) \
 	$(KBUILDDIR)/$(ARCHDIR)/crtend.o \
-	$(KBUILDDIR)/$(ARCHDIR)/crtn.o \
 
 LINK_LIST = \
 	$(LDFLAGS) \
-	$(KBUILDDIR)/$(ARCHDIR)/crti.o \
 	$(KBUILDDIR)/$(ARCHDIR)/crtbegin.o \
 	$(KERNEL_OBJS) \
 	$(LIBS) \
 	$(KBUILDDIR)/$(ARCHDIR)/crtend.o \
-	$(KBUILDDIR)/$(ARCHDIR)/crtn.o
 
 
+$(info LINK_LIST=$(LINK_LIST))
 .PHONY: all clean install install-headers install-kernel
 .SUFFIXES: .o .cpp .s .c
 

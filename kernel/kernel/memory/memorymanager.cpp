@@ -1,7 +1,7 @@
 #include <kernel/memory/memorymanager.h>
 #define ALIGN_UP(addr) (((addr) + 7) & ~7)
 
-void MemoryManager::set_ram_size()
+void MemoryManager::set_physicalmemory_dimensions()
 {
 	uint64_t total_ram_bytes = 0;
 	multiboot_tag_mmap *mmap_tag = NULL;
@@ -27,7 +27,7 @@ void MemoryManager::set_ram_size()
 		// Handle error: Memory map not found!
 		// You cannot proceed with memory management.
 		// print_error("Memory map not provided by bootloader!");
-		ul_physical_ram_size = 0; // No memory map found, set RAM size to 0
+		ul_physical_memory_size = 0; // No memory map found, set RAM size to 0
 		return;
 	}
 
@@ -49,7 +49,7 @@ void MemoryManager::set_ram_size()
 		mmap_entry = (multiboot_mmap_entry *)((uint8_t *)mmap_entry + entry_size);
 	}
 	// 'total_ram_bytes' now holds the total amount of usable RAM.
-	ul_physical_ram_size = total_ram_bytes; // Store the total RAM size in the class member
+	ul_physical_memory_size = total_ram_bytes; // Store the total RAM size in the class member
 }
 
 struct multiboot_tag_elf_sections *MemoryManager::get_elf_sections()
@@ -83,7 +83,7 @@ void MemoryManager::set_kernel_dimensions()
 
 		// Pointer to i-th section header, using elf->entsize
 		uint8_t *entry = (uint8_t *)elf->sections + i * elf->entsize;
-
+		
 		// Read addr and size from known ELF32 offsets
 		uint32_t addr = *(uint32_t *)(entry + 12); // offset of `addr` in ELF32
 		uint32_t size = *(uint32_t *)(entry + 20); // offset of `size` in ELF32

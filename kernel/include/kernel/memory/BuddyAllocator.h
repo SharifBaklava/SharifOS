@@ -2,99 +2,77 @@
 #include <consts.h>
 #include <stdint.h>
 #include <stdio.h>
-#define ALIGN_UP_4K(addr) (((addr) + 0xFFF) & ~0xFFF)
 
+#define ALIGN_UP_4K(addr) (((addr) + 0xFFF) & ~0xFFF)
+#define IS_ALIGNED(addr, alignment) (((uintptr_t)(addr) & ((alignment) - 1)) == 0)
 class MemoryManager; // Forward declaration
 
 #pragma pack(push, 1) // Ensure 1-byte alignment for the BuddyBlock structure
-struct BuddyBlock
+struct list_head
+{
+	void *next;
+	void *prev;
+};
+struct page
 {
 	uint8_t flags;
-	uintptr_t next;
-	uintptr_t prev;
+	uint8_t order;
+	struct list_head lru;
+	inline bool is_free();
+	inline void *get_block_start();
 };
 #pragma pack(pop) // Restore previous alignment
 
 class BuddyAllocator
 {
+friend class page;
 public:
 	void init(MemoryManager *memoryManager);
-	// private:
-	// 	LinkedList<size_t> free_lists[BUDDY_ORDERS]; // Array of linked lists for each order
-	// 	size_t page_size; // Total size of the memory managed by the buddy allocator
-	// 	void* internal_data;
-	// public:
-	// 	BuddyAllocator(size_t total_size)
-	// 	{
 
-	// 	}
-	// 	size_t calc_data()
-	// 	{
+	inline size_t get_block_size_by_order(uint8_t order);
+	inline int num_of_page_headers_to_next(size_t order)
+	{
+		return 1UL <<order;
+	}
+	inline page* get_page_header_by_address(void *address)
+	{
+		return (page *)block_info_array_start + ((size_t)address / BUDDY_ALLOCATOR_MIN_BLOCK_SIZE);
+	}
+	int find_closest_lower_order(size_t size)
+	{
+		size = size >> 12;
+		int order = -1;
+		while (order < BUDDY_ORDERS - 1 && size > 0)
+		{
+			size = size >> 1;
+			order++;
+		}
+		return order;
+	}
 
-	// 	}
-	// 	void* allocate(size_t size)
-	// 	{
-	// 		size_t aligned_size = align_to2power(size);
+	size_t find_closest_upper_order(size_t size)
+	{
+		uint8_t order = 0;
+		while (order < BUDDY_ORDERS - 1 && get_block_size_by_order(order) < size)
+		{
+			order++;
+		}
+		return order;
+	}
+	void *allocate(size_t size);
+	bool free(void *ptr);
 
-	// 	}
-	// 	void deallocate(void* ptr);
-	// 	size_t get_total_size() const;
-	// 	size_t get_free_size() const;
-	// 	size_t align_to2power(size_t size)
-	// 	{
-	// 		if (size < BUDDY_ALLOCATOR_MIN_BLOCK_SIZE) {
-	// 			return BUDDY_ALLOCATOR_MIN_BLOCK_SIZE;
-	// 		}
-	// 		size_t aligned_size = BUDDY_ALLOCATOR_MIN_BLOCK_SIZE;
-	// 		while (aligned_size < size) {
-	// 			aligned_size <<= 1; // Double the size until it is large enough
-	// 		}
-	// 		return aligned_size;
-	// 	}
+	int get_free_blocks_len(uint8_t order);
+
+private:
+	void remove_node_from_list(page *page_header, uint8_t order);
+	void add_node_to_list(page *page_header, uint8_t order);
+
+	void mark_block_used(page *page_header, uint8_t order, size_t splits);
+	void mark_block_unused(page *page_header, uint8_t order);
+
+private:
+	page *orders[BUDDY_ORDERS] = {nullptr};
+	void *block_info_array_start;
+	size_t block_info_array_size;
 };
-
-// struct page {
-//     unsigned long flags;
-//     struct list_head {
-//         struct page *next;
-//         struct page *prev;
-//     } lru;
-
-//     /* ... other fields ... */
-// };
-
-// --
-// -
-// --
-// --
-
-// --
-// --
-
-// --
-
-// RAM (0x0 → 0x08000000 = 128 MiB)
-// 0x00100000 (1 MiB) ┌───────────────────────────┐
-//                    │ Kernel ELF                │
-// 0x00200000 (2 MiB) ├───────────────────────────┤
-//                    │ struct free_area (~1 KB)  │ ← placed here by bootstrap allocator 11*orders head_0->page1
-//                    ├───────────────────────────┤
-//                    │ struct page array (2 MiB) │ ← placed here by bootstrap allocator
-// 0x00400000 (4 MiB) ├───────────────────────────┤
-//                    │ Free RAM (Buddy-managed)  │
-//                    │ (124 MiB free)            │
-//                    └───────────────────────────┘
-
-// struct free_area {
-//     struct list_head free_list;
-//     unsigned long nr_free;
-// };
-
-// struct list_head {
-//     struct list_head *next;
-//     struct list_head *prev;
-// };
-// free_area[11];
-
-// free_page->lru.next = free_area[7]->head;
-// free_area[7]->head = free_page;
