@@ -15,9 +15,11 @@ struct list_head
 };
 struct page
 {
-	uint8_t flags;
+	uint8_t flags;    // |?|?|?|?|?|?|?|inuse|
 	uint8_t order;
 	struct list_head lru;
+	inline void set_inuse();
+	inline void set_free();
 	inline bool is_free();
 	inline void *get_block_start();
 };
@@ -27,9 +29,10 @@ class BuddyAllocator
 {
 friend class page;
 public:
-	void init(MemoryManager *memoryManager);
+	void init();
 
 	inline size_t get_block_size_by_order(uint8_t order);
+	void reserved_memory();
 	inline int num_of_page_headers_to_next(size_t order)
 	{
 		return 1UL <<order;

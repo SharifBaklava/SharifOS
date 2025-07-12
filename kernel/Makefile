@@ -57,6 +57,8 @@ LINK_LIST := \
 	$(KBUILDDIR)/$(ARCHDIR)/crtend.o \
 	$(KBUILDDIR)/$(ARCHDIR)/crtn.o
 
+
+$(info LINK_LIST: $(LINK_LIST))
 .PHONY: all clean install install-headers install-kernel
 .SUFFIXES: .o .cpp .s .c
 
@@ -73,7 +75,6 @@ $(KBUILDDIR)/%.o: %.c
 
 $(KBUILDDIR)/%.o: %.cpp
 	mkdir -p $(dir $@)
-	echo "Compiling $<"
 	$(CXX) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
 $(KBUILDDIR)/%.o: %.s
