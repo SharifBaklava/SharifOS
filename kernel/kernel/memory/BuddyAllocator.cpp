@@ -201,51 +201,51 @@ void *BuddyAllocator::allocate(size_t size)
 
 void *BuddyAllocator::allocate(size_t size, void *preferred_addr)
 {
-// 	if (preferred_addr == nullptr)
-// 		return allocate(size);
+	if (preferred_addr == nullptr)
+		return allocate(size);
 
-// 	page *page_header = get_page_header_by_address(preferred_addr);
-// 	while (page_header->lru.next == nullptr && page_header->lru.prev == nullptr) // not a good condition
-// 	{
-// 		page_header -= 1;
-// 		// iterate pages by index, until a pge that on the free list found
-// 	}
-// 	// get the order of the page
-// 	if (!page_header->is_free())
-// 		return nullptr;
+	page *page_header = get_page_header_by_address(preferred_addr);
+	while (page_header->lru.next == nullptr && page_header->lru.prev == nullptr) // not a good condition
+	{
+		page_header -= 1;
+		// iterate pages by index, until a pge that on the free list found
+	}
+	// get the order of the page
+	if (!page_header->is_free())
+		return nullptr;
 
-// 	page *which_order = page_header;
-// 	uint8_t order = -1;
-// 	// find its head
-// 	while (which_order->lru.prev == nullptr)
-// 	{
-// 		which_order = (page *)which_order->lru.prev;
-// 	}
-// 	for (int i = 0; i < BUDDY_ORDERS; i++)
-// 	{
-// 		if (which_order == orders[i])
-// 		{
-// 			order = i;
-// 			break;
-// 		}
-// 	}
-// 	if (order == -1)
-// 		return nullptr;
+	page *which_order = page_header;
+	uint8_t order = -1;
+	// find its head
+	while (which_order->lru.prev == nullptr)
+	{
+		which_order = (page *)which_order->lru.prev;
+	}
+	for (int i = 0; i < BUDDY_ORDERS; i++)
+	{
+		if (which_order == orders[i])
+		{
+			order = i;
+			break;
+		}
+	}
+	if (order == -1)
+		return nullptr;
 
-// 	void *end_preferred_addr = (void *)((size_t)preferred_addr + size);
-// 	while (true)
-// 	{
-// 		void *start_addr = page_header->get_block_start();
-// 		void *end_addr = (void *)((size_t)start_addr + get_block_size_by_order(order));
+	void *end_preferred_addr = (void *)((size_t)preferred_addr + size);
+	while (true)
+	{
+		void *start_addr = page_header->get_block_start();
+		void *end_addr = (void *)((size_t)start_addr + get_block_size_by_order(order));
 
-// 		if (start_addr <= preferred_addr && end_addr >= end_preferred_addr)
-// 		{
-// 			remove_node_from_list()
-// 			mark_block_used(page_header, order, 0);
-// 			return start_addr;
-// 		}
-// 	}
-// 	return nullptr;
+		if (start_addr <= preferred_addr && end_addr >= end_preferred_addr)
+		{
+			remove_node_from_list()
+			mark_block_used(page_header, order, 0);
+			return start_addr;
+		}
+	}
+	return nullptr;
 }
 int BuddyAllocator::get_free_blocks_len(uint8_t order)
 {
