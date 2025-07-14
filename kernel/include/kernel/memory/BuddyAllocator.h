@@ -18,6 +18,11 @@ struct page
 	uint8_t flags;    // |?|?|?|?|?|?|?|inuse|
 	uint8_t order;
 	struct list_head lru;
+
+	void set_in_free_list()
+	{
+		
+	}
 	inline void set_inuse();
 	inline void set_free();
 	inline bool is_free();
@@ -63,6 +68,8 @@ public:
 		return order;
 	}
 	void *allocate(size_t size);
+	void *allocate(size_t size, void* preferred_addr);
+
 	bool free(void *ptr);
 
 	int get_free_blocks_len(uint8_t order);

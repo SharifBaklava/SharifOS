@@ -21,16 +21,16 @@ inline void page::set_inuse()
 	flags |= 0x01;
 }
 
-
 /* reserving memory of kernel image and struct pages by allocating this range of memory*/
-void BuddyAllocator::reserved_memory(){
-	void* start = 0;  //get_page_header_by_address((void*)krn.memoryManager.p_kernel_start);
-	//page* end = get_page_header_by_address((void*)(block_info_array_start + block_info_array_size));
-	void* end = (void*)(block_info_array_start + block_info_array_size) - - BUDDY_ALLOCATOR_MIN_BLOCK_SIZE;
-	
+void BuddyAllocator::reserved_memory()
+{
+	void *start = 0; // get_page_header_by_address((void*)krn.memoryManager.p_kernel_start);
+	// page* end = get_page_header_by_address((void*)(block_info_array_start + block_info_array_size));
+	void *end = (void *)(block_info_array_start + block_info_array_size) - -BUDDY_ALLOCATOR_MIN_BLOCK_SIZE;
 
 	// size_t size = end - start;
-	while(start < end ){
+	while (start < end)
+	{
 		start = allocate(BUDDY_ALLOCATOR_MIN_BLOCK_SIZE);
 	}
 }
@@ -40,7 +40,6 @@ void BuddyAllocator::init()
 	block_info_array_start = (void *)(ALIGN_UP_4K(
 		((size_t)(krn.memoryManager.p_kernel_start) + krn.memoryManager.ul_kernel_size)));
 
-	
 	block_info_array_size = (ALIGN_UP_4K((krn.memoryManager.ul_physical_memory_size / BUDDY_ALLOCATOR_MIN_BLOCK_SIZE) * sizeof(page)));
 
 	memset((void *)block_info_array_start, 0, block_info_array_size); // Should be at MemoryManager
@@ -50,10 +49,10 @@ void BuddyAllocator::init()
 	uint8_t order = find_closest_lower_order(krn.memoryManager.ul_physical_memory_size);
 	size_t start_addr = (size_t)krn.memoryManager.ul_memory_start;
 	page *base;
+	int offset = 0;
 	for (order; order > 0; order--)
 	{
 		int step = num_of_page_headers_to_next(order);
-		int offset = 0;
 		bool first = true;
 		int page_size = get_block_size_by_order(order);
 		while (true)
@@ -78,17 +77,15 @@ void BuddyAllocator::init()
 			start_addr += page_size;
 			offset += step;
 		}
-		break; // this is stops the bug from happening
 	}
 	reserved_memory();
 
-	printf("start reserved: %x\nend reserved: %x\n",krn.memoryManager.p_kernel_start, block_info_array_start + block_info_array_size);
-	void *SharifNullPageHaram = allocate(BUDDY_ALLOCATOR_MIN_BLOCK_SIZE -1);
+	printf("start reserved: %x\nend reserved: %x\n", krn.memoryManager.p_kernel_start, block_info_array_start + block_info_array_size);
+	void *SharifNullPageHaram = allocate(BUDDY_ALLOCATOR_MIN_BLOCK_SIZE - 1);
 	for (size_t o = 0; o < BUDDY_ORDERS; o++)
 	{
 		printf("BuddyAllocator::init: orders[%d] = 0x%d\n", o, get_free_blocks_len(o));
 	}
-
 
 	void *A = allocate(0x100);
 	void *B = allocate(0x100);
@@ -145,7 +142,6 @@ bool BuddyAllocator::free(void *addr)
 	return true; // Successfully freed the block
 }
 
-
 void BuddyAllocator::mark_block_unused(page *page_header, uint8_t order)
 {
 	for (order; order < BUDDY_ORDERS; order++)
@@ -153,13 +149,13 @@ void BuddyAllocator::mark_block_unused(page *page_header, uint8_t order)
 		page *aligned_buddy;
 		page *buddy;
 
-		if (IS_ALIGNED(page_header->get_block_start(), (BUDDY_ALLOCATOR_MIN_BLOCK_SIZE << order+1)))
-		{  
+		if (IS_ALIGNED(page_header->get_block_start(), (BUDDY_ALLOCATOR_MIN_BLOCK_SIZE << order + 1)))
+		{
 			// buddy = second ; aligned = first = page_header
 			buddy = page_header + num_of_page_headers_to_next(order);
 			aligned_buddy = page_header;
 		}
-		else 
+		else
 		{
 			// aligned_buddy = buddy = page_header - num_of_page_headers_to_next(order); = first  != page_header ; b1|b2
 			buddy = page_header - num_of_page_headers_to_next(order);
@@ -203,6 +199,54 @@ void *BuddyAllocator::allocate(size_t size)
 	return nullptr; // No suitable block found
 }
 
+void *BuddyAllocator::allocate(size_t size, void *preferred_addr)
+{
+// 	if (preferred_addr == nullptr)
+// 		return allocate(size);
+
+// 	page *page_header = get_page_header_by_address(preferred_addr);
+// 	while (page_header->lru.next == nullptr && page_header->lru.prev == nullptr) // not a good condition
+// 	{
+// 		page_header -= 1;
+// 		// iterate pages by index, until a pge that on the free list found
+// 	}
+// 	// get the order of the page
+// 	if (!page_header->is_free())
+// 		return nullptr;
+
+// 	page *which_order = page_header;
+// 	uint8_t order = -1;
+// 	// find its head
+// 	while (which_order->lru.prev == nullptr)
+// 	{
+// 		which_order = (page *)which_order->lru.prev;
+// 	}
+// 	for (int i = 0; i < BUDDY_ORDERS; i++)
+// 	{
+// 		if (which_order == orders[i])
+// 		{
+// 			order = i;
+// 			break;
+// 		}
+// 	}
+// 	if (order == -1)
+// 		return nullptr;
+
+// 	void *end_preferred_addr = (void *)((size_t)preferred_addr + size);
+// 	while (true)
+// 	{
+// 		void *start_addr = page_header->get_block_start();
+// 		void *end_addr = (void *)((size_t)start_addr + get_block_size_by_order(order));
+
+// 		if (start_addr <= preferred_addr && end_addr >= end_preferred_addr)
+// 		{
+// 			remove_node_from_list()
+// 			mark_block_used(page_header, order, 0);
+// 			return start_addr;
+// 		}
+// 	}
+// 	return nullptr;
+}
 int BuddyAllocator::get_free_blocks_len(uint8_t order)
 {
 	int count = 0;
