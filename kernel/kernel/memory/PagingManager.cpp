@@ -69,15 +69,11 @@ void *allocate(size_t size)
 		void *ptr = krn.memoryManager.buddy_allocator.allocate(BUDDY_ALLOCATOR_MIN_BLOCK_SIZE);
 		if (ptr == nullptr)
 		 	break;
-
 		PageTableEntry *page = (PageTableEntry *)(pageDirectory[dir_entry].bits.page_kind.david.phys_addr << 12);
-		page[table_entry + i] = PageTableEntry{.value = (uint32_t)ptr | 3};
-		
+		page[table_entry + i] = PageTableEntry{.value = (uint32_t)ptr | 3};	
 		// TODO: implement
 	}
-
 	// find size/4k free entries
-
 	// map the physical address to a virtual address
 	return new_address;
 }

@@ -38,4 +38,5 @@ public:
 		pagingManager.load();
 		pagingManager.enablePaging();
 	}
+
 };
