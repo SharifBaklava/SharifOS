@@ -26,6 +26,11 @@ struct page
 	inline void set_inuse();
 	inline void set_free();
 	inline bool is_free();
+
+	inline void set_chained()        { flags |= 0x02; } // 1 << 1
+	inline void clear_chained()      { flags &= ~0x02; }
+	inline bool is_chained() const   { return flags & 0x02; }
+	
 	inline void *get_block_start();
 };
 #pragma pack(pop) // Restore previous alignment
@@ -68,7 +73,7 @@ public:
 		return order;
 	}
 	void *allocate(size_t size);
-	void *allocate(size_t size, void* preferred_addr);
+	void *allocate(uint8_t desired_order, void *preferred_addr);
 
 	bool free(void *ptr);
 
