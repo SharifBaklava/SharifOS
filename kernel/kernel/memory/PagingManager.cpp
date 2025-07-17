@@ -3,7 +3,7 @@
 
 void PagingManager::init()
 {
-	pageDirectory = (PageDirectoryEntry *)krn.memoryManager.buddy_allocator.allocate(BUDDY_ALLOCATOR_MIN_BLOCK_SIZE);
+	pageDirectory = (PageDirectoryEntry *)krn.memoryManager.buddyAllocator.allocate(BUDDY_ALLOCATOR_MIN_BLOCK_SIZE);
 	if (pageDirectory == nullptr)
 	{
 		printf("you murdered the kernel :(\n");
@@ -14,7 +14,7 @@ void PagingManager::init()
 	}
 
 	// TODO: delete pagetable allocations from init
-	PageTableEntry *pageTable = (PageTableEntry *)krn.memoryManager.buddy_allocator.allocate(BUDDY_ALLOCATOR_MIN_BLOCK_SIZE);
+	PageTableEntry *pageTable = (PageTableEntry *)krn.memoryManager.buddyAllocator.allocate(BUDDY_ALLOCATOR_MIN_BLOCK_SIZE);
 	for (size_t i = 0; i < PAGE_TABLE_ENTRIES; i++)
 	{
 		// As the address is page aligned, it will always leave 12 bits zeroed.
@@ -66,7 +66,7 @@ void *allocate(size_t size)
 	// size_t i = 0;
 	// for (; i < pages_num; i++)
 	// {
-	// 	void *ptr = krn.memoryManager.buddy_allocator.allocate(BUDDY_ALLOCATOR_MIN_BLOCK_SIZE);
+	// 	void *ptr = krn.memoryManager.buddyAllocator.allocate(BUDDY_ALLOCATOR_MIN_BLOCK_SIZE);
 	// 	if (ptr == nullptr)
 	// 	 	break;
 	// 	PageTableEntry *page = (PageTableEntry *)(pageDirectory[dir_entry].bits.page_kind.david.phys_addr << 12);

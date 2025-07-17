@@ -24,7 +24,7 @@ public:
 	uint64_t ul_kernel_size;
 	uintptr_t p_kernel_start;
 public:
-	BuddyAllocator buddy_allocator;
+	BuddyAllocator buddyAllocator;
 	PagingManager pagingManager;
 
 public:
@@ -33,7 +33,7 @@ public:
 		this->p_multiboot_info = p_multiboot_info;
 		set_physicalmemory_dimensions();
 		set_kernel_dimensions();
-		buddy_allocator.init();
+		buddyAllocator.init();
 		pagingManager.init();
 		pagingManager.load();
 		pagingManager.enablePaging();
