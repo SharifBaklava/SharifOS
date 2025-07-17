@@ -12,7 +12,6 @@ make build-env
 ```bash
 make run-env
 make clean
-# First build may fail due to setup — run twice if needed
 make
 ```
 ## Run
