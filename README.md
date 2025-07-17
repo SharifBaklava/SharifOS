@@ -5,26 +5,24 @@
 ```bash
 make build-env
 
-# then
-make run-env
+
 ```
--------
 
-
-## Build Kernel & ISO (Inside Docker)
+## Build Kernel & ISO
 ```bash
+make run-env
 make clean
 # First build may fail due to setup — run twice if needed
 make
 ```
 ## Run
 ```bash
-qemu-system-i386 -cdrom dist/sharifos.iso -m 256M
+make run
 ```
 
 ## Debug
 ```bash
-qemu-system-i386 -cdrom dist/sharifos.iso -m 256M -s -S
+make debug
 gdb ./kernel/sharifos.kernel
 ```
 
@@ -33,7 +31,7 @@ gdb ./kernel/sharifos.kernel
 make docs
 ```
 
-## 🧹 Clean Build Artifacts
+## Clean Build Artifacts
 ```bash
 make clean
 ```
