@@ -1,23 +1,44 @@
-# SharifOs
-## build cross compiler environment
-```bash
-cd buildenv
-docker build -t sharifos-env .
-cd ..
-docker run -it --rm -v $(pwd):/mnt/share sharifos-env
-```
-## build kernel ISO
-```bash
-# in container!
-cd /mnt/share
-make clean
-./build.sh # First one fails for some reason
-./build.sh
-./iso.sh
+# SharifOS
+![SharifOS Logo](resources/images/logo.png)
+## Build Cross-Compiler Environment
 
+```bash
+make build-env
+
+# then
+make run-env
 ```
-## run 
+-------
+
+
+## Build Kernel & ISO (Inside Docker)
+```bash
+make clean
+# First build may fail due to setup — run twice if needed
+make
+```
+## Run
+```bash
+qemu-system-i386 -cdrom dist/sharifos.iso -m 256M
+```
+
+## Debug
 ```bash
 qemu-system-i386 -cdrom dist/sharifos.iso -m 256M -s -S
 gdb ./kernel/sharifos.kernel
+```
+
+## Documentation
+```bash
+make docs
+```
+
+## 🧹 Clean Build Artifacts
+```bash
+make clean
+```
+## Optional Scripts
+```bash
+./build.sh   # Builds kernel and headers (wrapper around `make`)
+./iso.sh     # Creates ISO image (wrapper around `make iso`)
 ```
