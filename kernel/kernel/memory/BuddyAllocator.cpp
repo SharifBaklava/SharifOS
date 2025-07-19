@@ -291,11 +291,11 @@ void *BuddyAllocator::allocate(uint8_t desiredOrder, void *preferredAddr)
 	page *orderPage = freeListPage;
 
 	// Traverse the list to find the order of the first free block
-	while (orderPage->lru.prev == nullptr)
+	while (orderPage->lru.prev != nullptr)
 	{
 		orderPage = (page *)orderPage->lru.prev;
 	}
-
+	
 	// Find the order of the first free block
 	for (int i = 0; i < BUDDY_ORDERS; i++)
 	{
@@ -355,9 +355,6 @@ void *BuddyAllocator::allocate(uint8_t desiredOrder, void *preferredAddr)
 
 	// Mark the block as used in the buddy system
 	markBlockUsed(freeListPage, order, 0);
-
-	// Set the order of the block to the desired order
-	freeListPage->order = order;
 
 	// Return the address of the block
 	return freeListPage->getBlockStart();
