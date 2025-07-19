@@ -85,7 +85,18 @@ public:
 	void markBlockUnused(page *pageHeader, uint8_t order);
 
 private:
+	/*
+	* @brief Array of pointers to page headers for each order of memory block.
+	*/
 	page *orders[BUDDY_ORDERS] = {nullptr};
+
+	/*
+	* @brief Pointer to the start of the block info array.
+	*/
 	void *m_p_block_info_array_start;
+
+	/*
+	* @brief Size of the block info array.
+	*/
 	size_t m_ui_block_info_array_size;
 };
