@@ -18,3 +18,4 @@ protected:
     Singleton() = default;  // Allow construction only by derived classes
     ~Singleton() = default;
 };
+

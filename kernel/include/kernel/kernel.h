@@ -1,14 +1,16 @@
 #pragma once
 #include <kernel/tty.h>
+#include <kernel/memory/memorymanager.h>
 
-class Kernel {
+#define krn Kernel::i
+class Kernel
+{
 public:
     Terminal terminal;
-
-    Kernel() =default;
-    Kernel(const Kernel&) = delete;
-    Kernel& operator=(const Kernel&) = delete;
-
+    MemoryManager memoryManager;
+    Kernel() = default;
+    Kernel(const Kernel &) = delete;
+    Kernel &operator=(const Kernel &) = delete;
+    void initialize(uintptr_t p_multiboot_info);
     static Kernel i;
 };
-
