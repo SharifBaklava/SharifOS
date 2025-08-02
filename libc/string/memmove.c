@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdint.h>
 
 void* memmove(void* dstptr, const void* srcptr, size_t size) {
 	unsigned char* dst = (unsigned char*) dstptr;
@@ -12,3 +13,22 @@ void* memmove(void* dstptr, const void* srcptr, size_t size) {
 	}
 	return dstptr;
 }
+
+// void * memmove(void *dst, const void *src, size_t len){
+//     uint8_t *dp = (uint8_t *)dst;
+//     const uint8_t *sp = (const uint8_t *)src;
+    
+//     if(sp < dp && sp + len > dp){
+//         sp += len;
+//         dp += len;
+//         while(len-- > 0){
+//             *--dp = *--sp;
+//         }
+//     }else{
+//         while(len-- > 0){
+//             *dp++ = *sp++;
+//         }
+//     }
+    
+//     return dst;
+// }

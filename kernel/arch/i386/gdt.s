@@ -22,6 +22,6 @@ setGdt:
     jmp     0x08:.flush
 .flush:
     nop
-    sti
+    ; sti
     pop     ebp
     ret

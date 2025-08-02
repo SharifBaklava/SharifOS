@@ -23,8 +23,8 @@ public:
 	void writestring(const char *data);
 	void setcolor(uint8_t color);
 	void putentryat(unsigned char c, uint8_t color, size_t x, size_t y);
-	void scroll(int lines = 1);
-
+	void scroll(size_t lines = 1);
+	void cleanLine(size_t line);
 		
 };
 

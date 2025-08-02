@@ -1,12 +1,12 @@
 #include <kernel/kernel.h>
 #include <kernel/memory/PagingManager.h>
-
+#include <stdlib.h>
 void PagingManager::init()
 {
 	pageDirectory = (PageDirectoryEntry *)krn.memoryManager.buddyAllocator.allocate(BUDDY_ALLOCATOR_MIN_BLOCK_SIZE);
 	if (pageDirectory == nullptr)
 	{
-		printf("you murdered the kernel :(\n");
+		abort();
 	}
 	for (size_t i = 0; i < PAGE_DIRECTORY_ENTRIES; i++)
 	{

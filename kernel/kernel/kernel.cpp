@@ -11,6 +11,10 @@ void Kernel::initialize(uintptr_t p_multiboot_info)
 	terminal.initialize();
 	memoryManager.init(p_multiboot_info);
 	printf("welcome to SharifOS \n");
+	for (int i = 0; i < 100; i++)
+	{
+		printf("hello world %d\n", i);
+	}
 
 }
 extern "C" void kernel_main(uint32_t magic, uint32_t mbi_addr)

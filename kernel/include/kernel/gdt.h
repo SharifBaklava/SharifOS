@@ -32,10 +32,10 @@ public:
 	void init()
 	{
 		set_gdt_entry(&gdt[0], 0, 0, 0, 0);
-		set_gdt_entry(&gdt[1], 0, 0xFFFFF, 0x9A, 0xCF); // Code segment
-		set_gdt_entry(&gdt[2], 0, 0xFFFFF, 0x92, 0xCF); // Data segment
-		set_gdt_entry(&gdt[3], 0, 0x000FFFFF, 0xfa, 0xcf);
-		set_gdt_entry(&gdt[4], 0, 0x000FFFFF, 0xf2, 0xcf);
+		set_gdt_entry(&gdt[1], 0, 0x000FFFFF, 0x9A, 0xCF); // Code segment
+		set_gdt_entry(&gdt[2], 0, 0x000FFFFF, 0x92, 0xCF); // Data segment
+		set_gdt_entry(&gdt[3], 0, 0x000FFFFF, 0xfa, 0xCF);
+		set_gdt_entry(&gdt[4], 0, 0x000FFFFF, 0xf2, 0xCF);
 		gdtdesc = {sizeof(gdt) - 1, (uint32_t)gdt};
 		lgdt();
 		printf("gdt %x\n", gdtdesc.base);

@@ -107,7 +107,7 @@ void MemoryManager::init(uintptr_t p_multiboot_info)
 	set_physicalmemory_dimensions();
 	set_kernel_dimensions();
 	buddyAllocator.init();
-	pagingManager.init();
-	pagingManager.load();
-	pagingManager.enablePaging();
+	// pagingManager.init();
+	// pagingManager.load();
+	// pagingManager.enablePaging();
 }

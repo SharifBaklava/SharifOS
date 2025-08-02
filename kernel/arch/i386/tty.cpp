@@ -44,7 +44,6 @@ void Terminal::putchar(char c)
 		{
 			// row = 0;
 			scroll(1); // Scroll up one line if we reach the end of the screen
-
 		}
 	}
 	else
@@ -54,9 +53,12 @@ void Terminal::putchar(char c)
 		{
 			column = 0;
 			if (++row == VGA_HEIGHT)
+			{
+				scroll(1); // Scroll up one line if we reach the end of the screen
+				
+			}
 				// row = 0;
 				// writestring("ddddd\n");
-				scroll(1); // Scroll up one line if we reach the end of the screen
 		}
 	}
 }
@@ -72,20 +74,34 @@ void Terminal::writestring(const char *data)
 	write(data, strlen(data));
 }
 
-void Terminal::scroll(int lines)
+
+void Terminal::scroll(size_t lines)
 {
-	char *dst = (char *)buffer;
-	char *src = (char *)buffer + lines * VGA_WIDTH * 2;
+
+
+	if (lines == 0) {
+        return;
+    }
+	if (lines >= VGA_HEIGHT) {
+        // call a terminal_clear() function here.
+        return;
+    }	
+	char *dst = (char *)VGA_MEMORY;
+	char *src = (char *)VGA_MEMORY + lines * VGA_WIDTH * 2;
 	size_t size = (VGA_HEIGHT - lines) * VGA_WIDTH * 2;
 	memmove(dst, src, size);
-	row -= lines;
+	row -= (lines);
 	column = 0;
 	for (size_t i = VGA_HEIGHT - lines; i < VGA_HEIGHT; ++i)
 	{
-		for (size_t j = 0; j < VGA_WIDTH; ++j)
-		{
-			putentryat(' ', color, j, i);
-		}
+		cleanLine(i);
+	}
+}
+void Terminal::cleanLine(size_t line)
+{
+	for (size_t i = 0; i < VGA_WIDTH; ++i)
+	{
+		putentryat(' ', color, i, line);
 	}
 }
 // Terminal Terminal::terminal; // Static instance of Terminal
