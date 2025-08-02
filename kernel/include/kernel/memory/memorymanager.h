@@ -10,7 +10,7 @@ class BuddyAllocator; // Forward declaration
 
 class MemoryManager
 {
-public:
+private:
 	void set_physicalmemory_dimensions();
 	struct multiboot_tag_elf_sections *get_elf_sections();
 	void set_kernel_dimensions();
@@ -28,15 +28,6 @@ public:
 	PagingManager pagingManager;
 
 public:
-	void init(uintptr_t p_multiboot_info)
-	{
-		this->p_multiboot_info = p_multiboot_info;
-		set_physicalmemory_dimensions();
-		set_kernel_dimensions();
-		buddyAllocator.init();
-		pagingManager.init();
-		pagingManager.load();
-		pagingManager.enablePaging();
-	}
+	void init(uintptr_t p_multiboot_info);
 
 };

@@ -83,7 +83,7 @@ void MemoryManager::set_kernel_dimensions()
 
 		// Pointer to i-th section header, using elf->entsize
 		uint8_t *entry = (uint8_t *)elf->sections + i * elf->entsize;
-		
+
 		// Read addr and size from known ELF32 offsets
 		uint32_t addr = *(uint32_t *)(entry + 12); // offset of `addr` in ELF32
 		uint32_t size = *(uint32_t *)(entry + 20); // offset of `size` in ELF32
@@ -99,4 +99,15 @@ void MemoryManager::set_kernel_dimensions()
 	}
 	ul_kernel_size = max_addr - min_addr;
 	p_kernel_start = min_addr; // Set the kernel start address
+}
+
+void MemoryManager::init(uintptr_t p_multiboot_info)
+{
+	this->p_multiboot_info = p_multiboot_info;
+	set_physicalmemory_dimensions();
+	set_kernel_dimensions();
+	buddyAllocator.init();
+	pagingManager.init();
+	pagingManager.load();
+	pagingManager.enablePaging();
 }

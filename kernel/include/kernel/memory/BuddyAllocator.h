@@ -81,7 +81,10 @@ public:
 	void removeNodeFromList(page *node, uint8_t order);
 	void addNodeToListStart(page *newNode, uint8_t order);
 
-	void markBlockUsed(page *pageHeader, uint8_t order, size_t splits);
+	void splitBlock(page *pageHeader, uint8_t order, size_t splits);
+
+
+	void markBlockUsed(page *pageHeader, uint8_t order);
 	void markBlockUnused(page *pageHeader, uint8_t order);
 
 private:
