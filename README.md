@@ -1,3 +1,3 @@
 # SharifOS
 
-This project is under development. You welcome to check out the `dev` branch or other branches!
+This project is under development. You're welcome to check out the `dev` branch or other branches!
