@@ -7,6 +7,7 @@ void abort(void) {
 	// TODO: Add proper kernel panic.
 	printf("BASBUSSA DI!\n");
 	printf("kernel: panic: abort()\n");
+	asm volatile ("cli; hlt");
 #else
 	// TODO: Abnormally terminate the process as if by SIGABRT.
 	printf("abort()\n");

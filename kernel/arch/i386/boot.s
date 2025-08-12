@@ -31,6 +31,7 @@ section .text
 bits 32
 
 _start:
+	cli
 	mov esp, stack_top
 	
 	push ebx

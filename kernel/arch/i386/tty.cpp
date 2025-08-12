@@ -7,7 +7,7 @@
 
 #include "vga.h"
 
-void Terminal::initialize(void)
+void Terminal::init(void)
 {
 	row = 0;
 	column = 0;

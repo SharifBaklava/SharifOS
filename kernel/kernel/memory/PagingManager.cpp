@@ -32,7 +32,7 @@ size_t PagingManager::find_free_pages(size_t num, size_t *dir_entry_idx, size_t 
 	bool success = false;
 	for (i = 0; i < PAGE_DIRECTORY_ENTRIES; i++)
 	{
-		if (!success)
+		if (success)
 			break;
 		PageTableEntry *pageTable = (PageTableEntry *)(pageDirectory[i].bits.page_kind.david.phys_addr << 12);
 		if (pageTable->value == 0)
@@ -68,8 +68,8 @@ size_t PagingManager::find_free_pages(size_t num, size_t *dir_entry_idx, size_t 
 		*dir_entry_idx = i - count / PAGE_TABLE_ENTRIES;
 		if (j < num)
 			*dir_entry_idx--;
-		
-			// if (*table_entry_idx < 0)
+
+		// if (*table_entry_idx < 0)
 		if (j < count % PAGE_TABLE_ENTRIES + 1)
 			*table_entry_idx += PAGE_TABLE_ENTRIES;
 
@@ -114,7 +114,6 @@ void *PagingManager::allocate(size_t num_pages)
 
 	if (num_allocated == 0)
 		return nullptr;
-
 	size_t i = 0;
 	for (; i < num_pages; i++)
 	{
@@ -129,11 +128,11 @@ void *PagingManager::allocate(size_t num_pages)
 		PageDirectoryEntry dirEntry = pageDirectory[dir_entry_idx];
 		if (dirEntry.value == 0)
 		{
-			if (!create_page_table(dir_entry_idx))
+			if (create_page_table(dir_entry_idx)!=0)
 				break;
 		}
 
-		if (!create_page_entry((PageTableEntry *)dirEntry.bits.page_kind.david.get_addr(), table_entry_idx))
+		if (create_page_entry((PageTableEntry *)dirEntry.bits.page_kind.david.get_addr(), table_entry_idx)!=0)
 			break;
 	}
 
@@ -162,7 +161,7 @@ int PagingManager::free_page_entry(PageTableEntry *table_entry, size_t table_ent
 	table_entry[table_entry_idx].value = 0;
 	return 0;
 }
-bool PagingManager::page_table_is_free(PageTableEntry* addr)
+bool PagingManager::page_table_is_free(PageTableEntry *addr)
 {
 	for (size_t i = 0; i < PAGE_TABLE_ENTRIES; i++)
 	{
@@ -174,18 +173,16 @@ bool PagingManager::page_table_is_free(PageTableEntry* addr)
 
 int PagingManager::free_page_table(size_t dir_entry_idx)
 {
-	
-	void* addr = (void*)(pageDirectory[dir_entry_idx].bits.page_kind.david.get_addr());
-	if(page_table_is_free((PageTableEntry*)addr))
+
+	void *addr = (void *)(pageDirectory[dir_entry_idx].bits.page_kind.david.get_addr());
+	if (page_table_is_free((PageTableEntry *)addr))
 	{
-		if(!krn.memoryManager.buddyAllocator.free(addr))
+		if (!krn.memoryManager.buddyAllocator.free(addr))
 			return -1;
 		pageDirectory[dir_entry_idx].value = 0;
 		return 0;
-
 	}
 }
-
 
 void PagingManager::free(void *addr, size_t num_pages)
 {
@@ -197,7 +194,7 @@ void PagingManager::free(void *addr, size_t num_pages)
 	{
 		if (table_entry_idx + i >= PAGE_TABLE_ENTRIES)
 		{
-			// TODO: should we free the page table? 
+			// TODO: should we free the page table?
 			// free_page_table(dir_entry_idx);
 			dir_entry_idx++;
 			table_entry_idx = 0;
@@ -206,7 +203,6 @@ void PagingManager::free(void *addr, size_t num_pages)
 			table_entry_idx++;
 
 		PageDirectoryEntry dirEntry = pageDirectory[dir_entry_idx];
-
 
 		if (!free_page_entry(dirEntry.bits.page_kind.david.get_addr(), table_entry_idx))
 		{

@@ -17,7 +17,7 @@ class Terminal
 	uint16_t *buffer;
 
 public:
-	void initialize(void);
+	void init(void);
 	void putchar(char c);
 	void write(const char *data, size_t size);
 	void writestring(const char *data);

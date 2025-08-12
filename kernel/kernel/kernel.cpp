@@ -2,15 +2,21 @@
 #include <cstdint>
 #include <kernel/memory/memorymanager.h>
 #include <kernel/kernel.h>
+#include <stdlib.h>
 
 Kernel Kernel::i;
 
-void Kernel::initialize(uintptr_t p_multiboot_info)
+void Kernel::init(uintptr_t p_multiboot_info)
 {
 	gdtInitializer.init();
-	terminal.initialize();
+	terminal.init();
 	memoryManager.init(p_multiboot_info);
-	printf("welcome to SharifOS \n");
+	interruptManager.init();
+	printf("welcome to SharifOSs \n");
+	abort(); // 
+	volatile int x = 0;
+	volatile int y = 5/x;
+	
 	for (int i = 0; i < 100; i++)
 	{
 		printf("hello world %d\n", i);
@@ -20,5 +26,5 @@ void Kernel::initialize(uintptr_t p_multiboot_info)
 extern "C" void kernel_main(uint32_t magic, uint32_t mbi_addr)
 {
 
-	krn.initialize(mbi_addr);
+	krn.init(mbi_addr);
 }
