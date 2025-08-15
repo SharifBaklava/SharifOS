@@ -51,9 +51,9 @@ void InterruptManager::set_idt_entry(uint8_t idx, uint32_t offset, uint16_t sele
 }
 void InterruptManager::load_idt()
 {
-	printf("Loading IDT...\n");
+	printf("Loading IDT... %x\n", idt);
 	idt_desc.offset = (uint32_t)idt;
-	idt_desc.size = sizeof(idt) - 1;
+	idt_desc.size = 256*8 - 1;
 	asm volatile("lidt %0" : : "m"(idt_desc));
 	asm volatile("sti" : :);
 

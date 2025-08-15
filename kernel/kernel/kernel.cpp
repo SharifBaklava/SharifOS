@@ -13,14 +13,14 @@ void Kernel::init(uintptr_t p_multiboot_info)
 	memoryManager.init(p_multiboot_info);
 	interruptManager.init();
 	printf("welcome to SharifOSs \n");
-	abort(); // 
+	// abort(); // 
 	volatile int x = 0;
 	volatile int y = 5/x;
 	
-	for (int i = 0; i < 100; i++)
-	{
-		printf("hello world %d\n", i);
-	}
+	// for (int i = 0; i < 100; i++)
+	// {
+	// 	printf("hello world %d\n", i);
+	// }
 
 }
 extern "C" void kernel_main(uint32_t magic, uint32_t mbi_addr)

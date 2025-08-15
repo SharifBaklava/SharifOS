@@ -17,8 +17,8 @@ typedef struct InterruptDescriptor32
 
 typedef struct
 {
-	uint32_t offset;
 	uint16_t size;
+	uint32_t offset;
 } __attribute__((packed)) idt_descriptor_t;
 
 #define DEFINE_ISR(name)                                 \
