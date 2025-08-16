@@ -2,43 +2,40 @@
 #include <kernel/kernel.h>
 #include <stdio.h>
 
-
-DEFINE_ISR(zero_devision)
+DEFINE_ISR(default_interrupt_handler)
 {
-	printf("Zero Division Exception occurred!\n");
-	abort();
+	printf("Unhandled interrupt!\n");
 }
 
 
-DEFINE_ISR(default_f)
+DEFINE_ISR(default_exception_handler)
 {
-    printf("Unhandled interrupt!\n");
-}
-
-__attribute__((noreturn)) extern "C" void exception_handler()
-{
-	printf("Exception occurred! System halted.\n");
+	printf("Unhandled Exception!\n");
 	abort();
 }
 
 void InterruptManager::init()
 {
-	idt = (idt_entry_t*)krn.memoryManager.pagingManager.allocate(1);
+	idt = (idt_entry_t *)krn.memoryManager.pagingManager.allocate(IDT_PAGES);
 	if (!idt)
 	{
 		printf("Failed to allocate memory for IDT.\n");
 		abort();
 	}
-	fill_idt();
-	printf("Initializing Interrupt Manager... %x\n", idt);
-	load_idt();
+	// fill_idt();
+	// load_idt();
 }
 void InterruptManager::fill_idt()
 {
-    for (uint16_t vector = 0; vector < 256; vector++)
-    {
-        set_idt_entry(vector, (uint32_t)&default_f_stub, 0x08, 0xE, 0, true);
-    }
+	uint16_t vector = 0;
+	for (; vector < 32; vector++)
+	{
+		set_idt_entry(vector, (uint32_t)&default_exception_handler_stub, 0x08, 0xE, 0, true);
+	}
+	for (; vector < IDT_ENTRIES; vector++)
+	{
+		set_idt_entry(vector, (uint32_t)&default_interrupt_handler_stub, 0x08, 0xE, 0, true);
+	}
 }
 void InterruptManager::set_idt_entry(uint8_t idx, uint32_t offset, uint16_t selector, uint8_t gate_type, uint8_t dpl, bool present)
 {
@@ -52,10 +49,10 @@ void InterruptManager::set_idt_entry(uint8_t idx, uint32_t offset, uint16_t sele
 void InterruptManager::load_idt()
 {
 	printf("Loading IDT... %x\n", idt);
+
+	idt_descriptor_t idt_desc;
 	idt_desc.offset = (uint32_t)idt;
-	idt_desc.size = 256*8 - 1;
+	idt_desc.size = sizeof(InterruptDescriptor) * IDT_ENTRIES - 1;
 	asm volatile("lidt %0" : : "m"(idt_desc));
 	asm volatile("sti" : :);
-
 }
-

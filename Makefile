@@ -86,7 +86,7 @@ clean:
 	done
 
 run:
-	qemu-system-i386 -cdrom "$(DISTDIR)/sharifos.iso" -m 256M
+	qemu-system-i386 -cdrom "$(DISTDIR)/sharifos.iso" -m 1G
 
 debug:
 	qemu-system-i386 -cdrom "$(DISTDIR)/sharifos.iso" -m 256M -s -S

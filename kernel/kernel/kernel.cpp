@@ -12,10 +12,8 @@ void Kernel::init(uintptr_t p_multiboot_info)
 	terminal.init();
 	memoryManager.init(p_multiboot_info);
 	interruptManager.init();
+	abort();
 	printf("welcome to SharifOSs \n");
-	// abort(); // 
-	volatile int x = 0;
-	volatile int y = 5/x;
 	
 	// for (int i = 0; i < 100; i++)
 	// {

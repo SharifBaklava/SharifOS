@@ -3,10 +3,9 @@
 #include <stdlib.h>
 
 #define IDT_PAGES 1
+#define IDT_ENTRIES 256
 
-extern "C" void *isr_stub_table[];
-
-typedef struct InterruptDescriptor32
+typedef struct InterruptDescriptor
 {
 	uint16_t offset_1;		 // offset bits 0..15
 	uint16_t selector;		 // a code segment selector in GDT or LDT
@@ -35,10 +34,8 @@ typedef struct
 
 class InterruptManager
 {
-	// idt_entry_t idt[256];
 	idt_entry_t* idt;
 
-	idt_descriptor_t idt_desc;
 
 public:
 	void init();

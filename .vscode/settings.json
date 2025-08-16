@@ -1,6 +1,7 @@
 {
 	"files.associations": {
 		"tty.h": "c",
-		"stdlib.h": "c"
+		"stdlib.h": "c",
+		"xtr1common": "cpp"
 	}
 }

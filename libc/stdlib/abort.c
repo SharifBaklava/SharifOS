@@ -5,7 +5,7 @@ __attribute__((__noreturn__))
 void abort(void) {
 #if defined(__is_libk)
 	// TODO: Add proper kernel panic.
-	printf("BASBUSSA DI!\n");
+	printf("BASBUSSA DIED:(\n");
 	printf("kernel: panic: abort()\n");
 	asm volatile ("cli; hlt");
 #else

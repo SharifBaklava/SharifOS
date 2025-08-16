@@ -93,6 +93,7 @@ private:
 	*/
 	page *orders[BUDDY_ORDERS] = {nullptr};
 
+public:
 	/*
 	* @brief Pointer to the start of the block info array.
 	*/

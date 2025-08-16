@@ -75,6 +75,8 @@ class PagingManager
 	friend class MemoryManager;
 private:
 	PageDirectoryEntry *pageDirectory;
+	PageDirectoryEntry *pageDirectoryVirtual;
+
 
 public:
 	void init();
@@ -91,8 +93,13 @@ private:
 		::enablePaging();
 	}
 
+
+	bool map_page(uintptr_t virt_addr, uintptr_t phys_addr) ;
+
+
 	int create_page_entry(PageTableEntry *table_entry, size_t table_entry_idx);
 	int free_page_entry(PageTableEntry *table_entry, size_t table_entry_idx);
+	void* new_page();
 
 	int create_page_table(size_t dir_entry_idx);
 	int free_page_table(size_t dir_entry_idx);
